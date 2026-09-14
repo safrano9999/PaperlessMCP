@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
 using PaperlessMCP.Client;
+using PaperlessMCP.Utils;
 using PaperlessMCP.Models.Common;
 using PaperlessMCP.Models.DocumentTypes;
 using static PaperlessMCP.Utils.ParsingHelpers;
@@ -65,12 +66,12 @@ public static class DocumentTypeTools
     }
 
     [McpServerTool(Name = "paperless_document_types_create")]
-    [Description("Create a new document type.")]
+    [Description("Create a shared document type definition. Its matching rule controls automatic assignment across documents.")]
     public static async Task<string> Create(
         PaperlessClient client,
         [Description("Document type name")] string name,
-        [Description("Match pattern for auto-assignment")] string? match = null,
-        [Description("Matching algorithm (0=None, 1=Any, 2=All, 3=Literal, 4=Regex, 5=Fuzzy, 6=Auto)")] int? matchingAlgorithm = null)
+        [Description(MatchingDescriptions.Pattern)] string? match = null,
+        [Description(MatchingDescriptions.Algorithm)] int? matchingAlgorithm = null)
     {
         var request = new DocumentTypeCreateRequest
         {
@@ -99,13 +100,13 @@ public static class DocumentTypeTools
     }
 
     [McpServerTool(Name = "paperless_document_types_update")]
-    [Description("Update an existing document type.")]
+    [Description("Update a shared document type definition. Send match and matchingAlgorithm together to change its rule; omit both to keep it.")]
     public static async Task<string> Update(
         PaperlessClient client,
         [Description("Document type ID")] int id,
         [Description("New name (optional)")] string? name = null,
-        [Description("Match pattern (optional)")] string? match = null,
-        [Description("Matching algorithm (optional)")] int? matchingAlgorithm = null)
+        [Description(MatchingDescriptions.Pattern)] string? match = null,
+        [Description(MatchingDescriptions.Algorithm)] int? matchingAlgorithm = null)
     {
         var request = new DocumentTypeUpdateRequest
         {
