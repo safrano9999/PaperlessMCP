@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
 using PaperlessMCP.Client;
+using PaperlessMCP.Utils;
 using PaperlessMCP.Models.Common;
 using PaperlessMCP.Models.Tags;
 using static PaperlessMCP.Utils.ParsingHelpers;
@@ -65,14 +66,14 @@ public static class TagTools
     }
 
     [McpServerTool(Name = "paperless_tags_create")]
-    [Description("Create a new tag.")]
+    [Description("Create a shared tag definition. Its matching rule controls automatic assignment across documents.")]
     public static async Task<string> Create(
         PaperlessClient client,
         [Description("Tag name")] string name,
         [Description("Hex color (e.g., '#ff0000')")] string? color = null,
-        [Description("Match pattern for auto-tagging")] string? match = null,
-        [Description("Matching algorithm (0=None, 1=Any, 2=All, 3=Literal, 4=Regex, 5=Fuzzy, 6=Auto)")] int? matchingAlgorithm = null,
-        [Description("Is inbox tag")] bool? isInboxTag = null,
+        [Description(MatchingDescriptions.Pattern)] string? match = null,
+        [Description(MatchingDescriptions.Algorithm)] int? matchingAlgorithm = null,
+        [Description("If true, apply this tag to every new document, independently of matching rules.")] bool? isInboxTag = null,
         [Description("Parent tag ID for hierarchical tags (optional)")] int? parent = null)
     {
         var request = new TagCreateRequest
@@ -107,15 +108,15 @@ public static class TagTools
     }
 
     [McpServerTool(Name = "paperless_tags_update")]
-    [Description("Update an existing tag.")]
+    [Description("Update a shared tag definition. Send match and matchingAlgorithm together to change its rule; omit both to keep it.")]
     public static async Task<string> Update(
         PaperlessClient client,
         [Description("Tag ID")] int id,
         [Description("New name (optional)")] string? name = null,
         [Description("Hex color (e.g., '#ff0000', optional)")] string? color = null,
-        [Description("Match pattern (optional)")] string? match = null,
-        [Description("Matching algorithm (optional)")] int? matchingAlgorithm = null,
-        [Description("Is inbox tag (optional)")] bool? isInboxTag = null,
+        [Description(MatchingDescriptions.Pattern)] string? match = null,
+        [Description(MatchingDescriptions.Algorithm)] int? matchingAlgorithm = null,
+        [Description("If true, apply this tag to every new document, independently of matching rules. Omit to retain the current setting.")] bool? isInboxTag = null,
         [Description("Parent tag ID. Omit to leave the parent unchanged.")] int? parent = null,
         [Description("Set true to move the tag to the root level. Cannot be combined with parent.")] bool clearParent = false)
     {

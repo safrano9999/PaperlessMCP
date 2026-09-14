@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
 using PaperlessMCP.Client;
+using PaperlessMCP.Utils;
 using PaperlessMCP.Models.Common;
 using PaperlessMCP.Models.StoragePaths;
 using static PaperlessMCP.Utils.ParsingHelpers;
@@ -65,13 +66,13 @@ public static class StoragePathTools
     }
 
     [McpServerTool(Name = "paperless_storage_paths_create")]
-    [Description("Create a new storage path.")]
+    [Description("Create a shared storage path definition. Its matching rule controls automatic assignment across documents.")]
     public static async Task<string> Create(
         PaperlessClient client,
         [Description("Storage path name")] string name,
         [Description("Path template (e.g., '{correspondent}/{document_type}')")] string path,
-        [Description("Match pattern for auto-assignment")] string? match = null,
-        [Description("Matching algorithm (0=None, 1=Any, 2=All, 3=Literal, 4=Regex, 5=Fuzzy, 6=Auto)")] int? matchingAlgorithm = null)
+        [Description(MatchingDescriptions.Pattern)] string? match = null,
+        [Description(MatchingDescriptions.Algorithm)] int? matchingAlgorithm = null)
     {
         var request = new StoragePathCreateRequest
         {
@@ -101,14 +102,14 @@ public static class StoragePathTools
     }
 
     [McpServerTool(Name = "paperless_storage_paths_update")]
-    [Description("Update an existing storage path.")]
+    [Description("Update a shared storage path definition. Send match and matchingAlgorithm together to change its rule; omit both to keep it.")]
     public static async Task<string> Update(
         PaperlessClient client,
         [Description("Storage path ID")] int id,
         [Description("New name (optional)")] string? name = null,
         [Description("Path template (optional)")] string? path = null,
-        [Description("Match pattern (optional)")] string? match = null,
-        [Description("Matching algorithm (optional)")] int? matchingAlgorithm = null)
+        [Description(MatchingDescriptions.Pattern)] string? match = null,
+        [Description(MatchingDescriptions.Algorithm)] int? matchingAlgorithm = null)
     {
         var request = new StoragePathUpdateRequest
         {
