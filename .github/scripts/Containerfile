@@ -1,0 +1,38 @@
+# Source of truth: SCRIPTS/githubactions. Generated copies are overwritten.
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:2fa828c68761b1b8c23d7662dc134421b9d3b59fe1425fdbc80804e390cdb24d AS build
+ARG VERSION=0.0.0-dev
+WORKDIR /src
+
+# Copy project file and restore dependencies
+COPY PaperlessMCP.csproj .
+RUN dotnet restore
+
+# Copy source code and build
+COPY . .
+RUN dotnet publish -c Release -o /app/publish /p:Version=${VERSION}
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:6a94333d37514e385650a3c81a55e5350b67253dbe136e9cf17e499c35606a8c AS runtime
+ARG VERSION=0.0.0-dev
+WORKDIR /app
+
+# OCI Labels
+LABEL org.opencontainers.image.title="PaperlessMCP"
+LABEL org.opencontainers.image.description="Model Context Protocol server for Paperless-ngx"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.source="https://github.com/barryw/PaperlessMCP"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Copy published application
+COPY --from=build /app/publish .
+
+# Set environment variables
+ENV ASPNETCORE_URLS=http://+:5000
+ENV MCP_PORT=5000
+
+# Expose port for HTTP transport
+EXPOSE 5000
+
+# Run the application (HTTP mode by default)
+ENTRYPOINT ["dotnet", "PaperlessMCP.dll"]
