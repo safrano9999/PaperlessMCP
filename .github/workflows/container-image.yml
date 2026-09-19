@@ -89,5 +89,8 @@ jobs:
           build-args: VERSION=${{ steps.meta.outputs.version }}
           labels: |
             io.safrano9999.build.commit=${{ github.sha }}
+            io.safrano9999.build.source=2a10cee881d67412e1d2431c5d8661558d87befe
+            io.safrano9999.build.inputs=ca9d5c982b18c84e0d5d7c13fd2eaffad0689e346244db53d6419f83db691a58
+            io.safrano9999.owner.patches=33692ebdfe9e9271dbd40fd2fa4925ccafbc69d3314d89c6061f37eedd62b000
             org.opencontainers.image.source=https://github.com/safrano9999/PaperlessMCP
             org.opencontainers.image.revision=${{ steps.meta.outputs.revision }}
