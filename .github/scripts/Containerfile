@@ -2,6 +2,12 @@
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:2fa828c68761b1b8c23d7662dc134421b9d3b59fe1425fdbc80804e390cdb24d AS build
 ARG VERSION=0.0.0-dev
+# Require the Ubuntu eMudhra trust-store security update.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' ca-certificates)" ge '20260816ubuntu0.24.04.1' \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 
 # Copy project file and restore dependencies
@@ -15,6 +21,12 @@ RUN dotnet publish -c Release -o /app/publish /p:Version=${VERSION}
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:6a94333d37514e385650a3c81a55e5350b67253dbe136e9cf17e499c35606a8c AS runtime
 ARG VERSION=0.0.0-dev
+# Require the Ubuntu eMudhra trust-store security update.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' ca-certificates)" ge '20260816ubuntu0.24.04.1' \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # OCI Labels
