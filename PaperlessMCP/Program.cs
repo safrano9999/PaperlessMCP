@@ -131,10 +131,13 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
                                   ?? configuration.GetValue<string>("Paperless:OutboxDirectory")
                                   ?? PaperlessOptions.DefaultOutboxDirectory;
 
-        options.MaxInlineBase64Bytes = ParsingHelpers.ParsePositiveInt(
+        var configuredMaxInlineBase64Bytes = ParsingHelpers.ParsePositiveInt(
             Environment.GetEnvironmentVariable("MAX_INLINE_BASE64_BYTES"),
             configuration.GetValue<int?>("Paperless:MaxInlineBase64Bytes")
                 ?? PaperlessOptions.DefaultMaxInlineBase64Bytes);
+        options.MaxInlineBase64Bytes = ParsingHelpers.ParsePositiveMegabytesToBytes(
+            Environment.GetEnvironmentVariable("PAPERLESS_MCP_MAX_INLINE_MB"),
+            configuredMaxInlineBase64Bytes);
     });
 
     // Configure retry policy for transient errors

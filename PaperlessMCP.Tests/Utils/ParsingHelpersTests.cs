@@ -26,4 +26,24 @@ public class ParsingHelpersTests
     {
         ParsingHelpers.ParsePositiveInt(input, fallback: 30).Should().Be(30);
     }
+
+    [Theory]
+    [InlineData("1", 1024 * 1024)]
+    [InlineData("32", 32 * 1024 * 1024)]
+    public void ParsePositiveMegabytesToBytes_WithValidValue_ReturnsBytes(string input, int expected)
+    {
+        ParsingHelpers.ParsePositiveMegabytesToBytes(input, fallback: 12 * 1024).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("0")]
+    [InlineData("-1")]
+    [InlineData("2048")]
+    [InlineData("not-a-number")]
+    public void ParsePositiveMegabytesToBytes_WithInvalidValue_ReturnsFallback(string? input)
+    {
+        ParsingHelpers.ParsePositiveMegabytesToBytes(input, fallback: 12 * 1024).Should().Be(12 * 1024);
+    }
 }

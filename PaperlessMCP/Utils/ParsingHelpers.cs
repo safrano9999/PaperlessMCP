@@ -46,4 +46,18 @@ public static class ParsingHelpers
     {
         return int.TryParse(input, out var parsed) && parsed > 0 ? parsed : fallback;
     }
+
+    /// <summary>
+    /// Parses a positive MiB value into bytes, returning a fallback for missing,
+    /// malformed, non-positive, or overflowing values.
+    /// </summary>
+    public static int ParsePositiveMegabytesToBytes(string? input, int fallback)
+    {
+        const int bytesPerMiB = 1024 * 1024;
+        return int.TryParse(input, out var parsed)
+            && parsed > 0
+            && parsed <= int.MaxValue / bytesPerMiB
+            ? parsed * bytesPerMiB
+            : fallback;
+    }
 }

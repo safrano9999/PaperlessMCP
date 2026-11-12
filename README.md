@@ -342,6 +342,7 @@ Environment variables. That's it. No config files to manage.
 | `HTTP_TIMEOUT_SECONDS` | | `30` | Timeout for requests to Paperless-ngx. Raise it if large full-text searches time out |
 | `PAPERLESS_OUTBOX_DIR` | | `/home/mcp/outbox` | Directory `paperless_documents_export_to_outbox` writes into. Mount it as a shared volume or the exports are unreachable outside the container |
 | `MAX_INLINE_BASE64_BYTES` | | `12288` | Upper bound (in bytes) on the file size `paperless_documents_download` will inline as base64 when `returnBase64=true`. Kept small by default because base64 inflates the payload by ~4/3 and it must fit the model's tool-output budget; raise it if your client can handle larger inline files, or keep using `paperless_documents_export_to_outbox` for big files |
+| `PAPERLESS_MCP_MAX_INLINE_MB` | | — | Optional inline download limit in MiB; takes precedence over `MAX_INLINE_BASE64_BYTES` when set. The default remains 12 KiB |
 
 Aliases supported: `PAPERLESS_URL` and `PAPERLESS_TOKEN` also work if that's your style, and `OUTBOX_DIR` is accepted for `PAPERLESS_OUTBOX_DIR`.
 

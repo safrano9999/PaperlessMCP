@@ -126,11 +126,11 @@ public static class DocumentTools
     }
 
     [McpServerTool(Name = "paperless_documents_download")]
-    [Description("Get download URLs for a document's original file, preview, and thumbnail. Set returnBase64=true to also inline the file bytes as base64, but only for tiny files: use paperless_documents_export_to_outbox for anything real.")]
+    [Description("Get download URLs for a document's original file, preview, and thumbnail. Set returnBase64=true to inline file bytes as base64. The limit is configurable with PAPERLESS_MCP_MAX_INLINE_MB (MiB) or the legacy MAX_INLINE_BASE64_BYTES (bytes); use paperless_documents_export_to_outbox when avoiding model-context transfer.")]
     public static async Task<string> Download(
         PaperlessClient client,
         [Description("Document ID")] int id,
-        [Description("Also return the file content as base64. Allowed only for small files (default limit ~12 KB, configurable via MAX_INLINE_BASE64_BYTES). Use paperless_documents_export_to_outbox otherwise.")] bool returnBase64 = false)
+        [Description("Also return the file content as base64 (default limit ~12 KB; configurable with PAPERLESS_MCP_MAX_INLINE_MB in MiB or MAX_INLINE_BASE64_BYTES in bytes). Use paperless_documents_export_to_outbox when avoiding model-context transfer.")] bool returnBase64 = false)
     {
         var document = await client.GetDocumentAsync(id).ConfigureAwait(false);
 
