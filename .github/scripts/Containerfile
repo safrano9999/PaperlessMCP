@@ -21,11 +21,11 @@ COPY . .
 # Fail closed if the upstream source changes, so the image cannot silently drift.
 RUN test "$(grep -Fxc '    private const int MaxInlineBase64Bytes = 12 * 1024;' Tools/DocumentTools.cs)" -eq 1 \
     && sed -i \
-        -e 's|    private const int MaxInlineBase64Bytes = 12 \\* 1024;|    private const int DefaultMaxInlineBase64Bytes = 12 * 1024;\\n    private static int MaxInlineBase64Bytes => GetMaxInlineBase64Bytes();\\n\\n    private static int GetMaxInlineBase64Bytes()\\n    {\\n        var configured = Environment.GetEnvironmentVariable("MAX_INLINE_BASE64_BYTES");\\n        return int.TryParse(configured, out var value) \\&\\& value > 0 ? value : DefaultMaxInlineBase64Bytes;\\n    }|' \
-        -e 's|inline the file bytes as base64, but only for tiny files: use paperless_documents_export_to_outbox for anything real.|inline files up to MAX_INLINE_BASE64_BYTES as base64 (default 12 KiB); use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.|' \
-        -e 's|Also return the file content as base64 (only allowed for tiny files, ~12 KB). Use paperless_documents_export_to_outbox otherwise.|Also return the file content as base64 (configurable with MAX_INLINE_BASE64_BYTES; default 12 KiB). Use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.|' \
+        -e 's|    private const int MaxInlineBase64Bytes = 12 \\* 1024;|    private const int DefaultMaxInlineBase64Bytes = 12 * 1024;\\n    private static int MaxInlineBase64Bytes => GetMaxInlineBase64Bytes();\\n\\n    private static int GetMaxInlineBase64Bytes()\\n    {\\n        var configured = Environment.GetEnvironmentVariable("PAPERLESS_MCP_MAX_INLINE_MB");\\n        return int.TryParse(configured, out var value) ? (value > 0 && value <= int.MaxValue / (1024 * 1024) ? value * 1024 * 1024 : DefaultMaxInlineBase64Bytes) : DefaultMaxInlineBase64Bytes;\\n    }|' \
+        -e 's|inline the file bytes as base64, but only for tiny files: use paperless_documents_export_to_outbox for anything real.|inline files up to PAPERLESS_MCP_MAX_INLINE_MB MiB as base64 (default 12 KiB); use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.|' \
+        -e 's|Also return the file content as base64 (only allowed for tiny files, ~12 KB). Use paperless_documents_export_to_outbox otherwise.|Also return the file content as base64 (configurable with PAPERLESS_MCP_MAX_INLINE_MB (MiB; default 12 KiB)). Use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.|' \
         Tools/DocumentTools.cs \
-    && grep -Fq 'Environment.GetEnvironmentVariable("MAX_INLINE_BASE64_BYTES")' Tools/DocumentTools.cs \
+    && grep -Fq 'Environment.GetEnvironmentVariable("PAPERLESS_MCP_MAX_INLINE_MB")' Tools/DocumentTools.cs \
     && grep -Fq 'DefaultMaxInlineBase64Bytes = 12 * 1024' Tools/DocumentTools.cs
 RUN dotnet publish -c Release -o /app/publish /p:Version=${VERSION}
 
