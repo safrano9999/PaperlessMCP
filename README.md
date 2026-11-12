@@ -238,7 +238,7 @@ Requires [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 | `paperless_documents_update` | Update title, tags, correspondent, etc. |
 | `paperless_documents_delete` | Delete a document (requires confirmation) |
 | `paperless_documents_bulk_update` | Update multiple documents at once |
-| `paperless_documents_download` | Get download, preview and thumbnail URLs; optionally inline tiny files as base64 |
+| `paperless_documents_download` | Get download, preview and thumbnail URLs; optionally inline files up to 32 MiB as base64 |
 | `paperless_documents_export_to_outbox` | Write a document's file into the shared outbox directory so another tool can attach it by path |
 | `paperless_documents_preview` | Get preview URL |
 | `paperless_documents_thumbnail` | Get thumbnail URL |

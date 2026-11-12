@@ -780,7 +780,7 @@ public class DocumentToolsTests : IDisposable
     {
         // Arrange: no Content-Length, so the cap cannot be enforced from the header. The read
         // itself must be bounded instead.
-        var bigBytes = new byte[13 * 1024];
+        var bigBytes = new byte[MaxInlineBase64BytesForTests + 1];
         _factory.SetupGet("api/documents/1/", TestFixtures.Documents.CreateDocumentJson(1, "Test Doc"));
         SetupDownloadResponse(
             $"{_factory.Options.BaseUrl}/api/documents/1/download/",
@@ -820,7 +820,7 @@ public class DocumentToolsTests : IDisposable
     public async Task Download_WithReturnBase64_WhenTooLarge_ReturnsValidationError()
     {
         // Arrange
-        var bigBytes = new byte[13 * 1024];
+        var bigBytes = new byte[MaxInlineBase64BytesForTests + 1];
         _factory.SetupGet("api/documents/1/", TestFixtures.Documents.CreateDocumentJson(1, "Test Doc"));
         SetupDownloadBytes(1, bigBytes);
 
@@ -1677,7 +1677,7 @@ public class DocumentToolsTests : IDisposable
 
     #endregion
     /// <summary>Mirrors DocumentTools.MaxInlineBase64Bytes, which is private.</summary>
-    private const int MaxInlineBase64BytesForTests = 12 * 1024;
+    private const int MaxInlineBase64BytesForTests = 32 * 1024 * 1024;
 
     private abstract class TestBodyStream : Stream
     {
