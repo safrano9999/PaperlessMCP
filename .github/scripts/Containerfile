@@ -16,6 +16,19 @@ RUN dotnet restore
 
 # Copy source code and build
 COPY . .
+
+# Apply the custom runtime policy at image build time.
+# Fail closed if the upstream source changes, so the image cannot silently drift.
+RUN test "$(grep -Fxc '    private const int MaxInlineBase64Bytes = 12 * 1024;' Tools/DocumentTools.cs)" -eq 1 \
+    && awk '/private const int MaxInlineBase64Bytes = 12 \* 1024;/ { print "    private const int DefaultMaxInlineBase64Bytes = 12 * 1024;"; print "    private static int MaxInlineBase64Bytes => GetMaxInlineBase64Bytes();"; print ""; print "    private static int GetMaxInlineBase64Bytes()"; print "    {"; print "        var configured = Environment.GetEnvironmentVariable(\"PAPERLESS_MCP_MAX_INLINE_MB\");"; print "        if (!int.TryParse(configured, out var value) || value <= 0 || value > int.MaxValue / (1024 * 1024)) return DefaultMaxInlineBase64Bytes;"; print "        return value * 1024 * 1024;"; print "    }"; next } { print }' Tools/DocumentTools.cs > Tools/DocumentTools.cs.patched \
+    && mv Tools/DocumentTools.cs.patched Tools/DocumentTools.cs \
+    && sed -i \
+        -e 's|inline the file bytes as base64, but only for tiny files: use paperless_documents_export_to_outbox for anything real.|inline files up to PAPERLESS_MCP_MAX_INLINE_MB MiB as base64 (default 12 KiB); use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.|' \
+        -e 's|Also return the file content as base64 (only allowed for tiny files, ~12 KB). Use paperless_documents_export_to_outbox otherwise.|Also return the file content as base64 (configurable with PAPERLESS_MCP_MAX_INLINE_MB in MiB; default 12 KiB). Use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.|' \
+        Tools/DocumentTools.cs \
+    && test "$(grep -Fxc '    private const int DefaultMaxInlineBase64Bytes = 12 * 1024;' Tools/DocumentTools.cs)" -eq 1 \
+    && grep -Fq 'Environment.GetEnvironmentVariable("PAPERLESS_MCP_MAX_INLINE_MB")' Tools/DocumentTools.cs \
+    && grep -Fq 'return value * 1024 * 1024;' Tools/DocumentTools.cs
 RUN dotnet publish -c Release -o /app/publish /p:Version=${VERSION}
 
 # Runtime stage
