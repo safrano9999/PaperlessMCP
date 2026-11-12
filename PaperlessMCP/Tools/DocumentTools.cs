@@ -128,16 +128,16 @@ public static class DocumentTools
     /// <summary>
     /// Upper bound on the raw file size returnable inline as base64. base64 inflates by ~4/3
     /// and the whole tool response must fit the model's tool-output budget, so this is kept
-    /// deliberately bounded: anything larger must go through paperless_documents_export_to_outbox.
+    /// deliberately small: anything larger must go through paperless_documents_export_to_outbox.
     /// </summary>
-    private const int MaxInlineBase64Bytes = 32 * 1024 * 1024;
+    private const int MaxInlineBase64Bytes = 12 * 1024;
 
     [McpServerTool(Name = "paperless_documents_download")]
-    [Description("Get download URLs for a document's original file, preview, and thumbnail. Set returnBase64=true to also inline files up to 32 MiB as base64; use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.")]
+    [Description("Get download URLs for a document's original file, preview, and thumbnail. Set returnBase64=true to also inline the file bytes as base64, but only for tiny files: use paperless_documents_export_to_outbox for anything real.")]
     public static async Task<string> Download(
         PaperlessClient client,
         [Description("Document ID")] int id,
-        [Description("Also return the file content as base64 (up to 32 MiB raw file size). Use paperless_documents_export_to_outbox for larger files or when avoiding model-context transfer.")] bool returnBase64 = false)
+        [Description("Also return the file content as base64 (only allowed for tiny files, ~12 KB). Use paperless_documents_export_to_outbox otherwise.")] bool returnBase64 = false)
     {
         var document = await client.GetDocumentAsync(id).ConfigureAwait(false);
 
